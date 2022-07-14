@@ -38,15 +38,10 @@ export const RoomIndex = () => {
   const { user } = useContext(AppContext)
 
   const [rooms, setRooms] = useState([])
-
   const [form, setForm] = useState({})
-
   const [range, setRangePicker] = useState([])
-
   const [unavailableRanges, setUnavailableRanges] = useState([])
-  console.log('unavailableRanges', unavailableRanges)
   const [isSelectedRangeConflict, setIsSelectedRangeConflict] = useState(false)
-
   const [displaySuccessAlert, setDisplaySuccessAlert] = useState(false)
 
   useEffect(() => {
@@ -54,14 +49,12 @@ export const RoomIndex = () => {
   }, [range])
 
   const handleClick = async () => {
-    console.log('CLICKED BOOK, ', form)
     await saveBooking(transformPayload(form))
     setDisplaySuccessAlert(true)
   }
 
   useEffect(() => {
     getRooms().then((rooms) => {
-      console.log('then of rooms: ', rooms)
       setRooms(rooms)
     })
   }, [])
@@ -87,7 +80,6 @@ export const RoomIndex = () => {
         <Popconfirm
           title="Confirm Booking"
           onConfirm={handleClick}
-          onVisibleChange={() => console.log('visible change')}
           disabled={!isDateSelected || isSelectedRangeConflict}
         >
           {isSelectedRangeConflict && (

@@ -48,7 +48,7 @@ export const RangePickerWithTime = ({
   return (
     <RangePicker
       showTime
-      minuteStep={30}
+      minuteStep={15}
       format="YYYY/MM/DD HH:mm"
       disabledDate={disabledDate}
       onChange={onChange}

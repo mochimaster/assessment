@@ -25,7 +25,7 @@ export const UserShow = (props) => {
   const { user, dispatchUserEvent } = useContext(AppContext)
 
   useEffect(() => {
-    if (isEmpty(user) && isLoggedIn) setIsLoggedIn(false)
+    if (isEmpty(user)) setIsLoggedIn(false)
   }, [user])
 
   const onFinish = async (values) => {

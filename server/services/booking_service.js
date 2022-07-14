@@ -44,7 +44,7 @@ const updateOne = (body) =>
 
 const getApprovedBookingsByRoomId = (roomId) =>
   db.query(
-    `SELECT * FROM bookings WHERE room_id=${roomId} AND status = 'APPROVED' ORDER BY 1 DESC`
+    `SELECT * FROM bookings WHERE room_id=${roomId} AND (status = 'APPROVED' OR status = 'AUTO APPROVED') ORDER BY 1 DESC`
   )
 
 module.exports = {

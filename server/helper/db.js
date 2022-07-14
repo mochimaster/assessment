@@ -9,7 +9,7 @@ const pool = new Pool(config.db)
  *
  * @see https://node-postgres.com/features/pooling#single-query
  */
-async function query(query, params) {
+async function query(query) {
   const { rows } = await pool.query(query)
 
   return rows
