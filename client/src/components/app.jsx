@@ -32,7 +32,6 @@ const App = () => {
     <div>
       <AppContext.Provider value={{ user, dispatchUserEvent }}>
         <Route path="/" component={UserShow} />
-        <Route exact path="/booking"></Route>
         <Switch>
           <Route path="/booking" component={BookingIndex} />
           <Route path="/" component={RoomIndex} />
