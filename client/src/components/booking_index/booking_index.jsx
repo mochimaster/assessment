@@ -30,10 +30,6 @@ export const BookingIndex = () => {
   const canApprove =
     user.role === ROLES.ADMIN || user.role === ROLES['FACILITY MANAGER']
 
-  console.log('canApprove', canApprove)
-  console.log('user.role', user.role)
-  console.log('ROLES', ROLES['FACILITY MANAGER'])
-
   const columns = [
     {
       title: 'Booking ID',
@@ -100,7 +96,6 @@ export const BookingIndex = () => {
       title: 'Action',
       key: 'action',
       render: (_, record) => {
-        console.log('record: ', record)
         const isApprovalNeeded = [
           BOOKING_STATUS['SEMI APPROVED'],
           BOOKING_STATUS.PENDING

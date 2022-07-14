@@ -183,8 +183,15 @@ const Room = sql.define({
 
 const bookingsToInsert = [
   {
-    room_id: 5,
+    room_id: 1,
     status: 'AUTO APPROVED',
+    timeslot_from: '1657143000',
+    timeslot_to: '1657146600',
+    requester_id: 1
+  },
+  {
+    room_id: 5,
+    status: 'APPROVED',
     timeslot_from: '1657143000',
     timeslot_to: '1657146600',
     requester_id: 1,
@@ -192,7 +199,7 @@ const bookingsToInsert = [
   },
   {
     room_id: 6,
-    status: 'AUTO APPROVED',
+    status: 'APPROVED',
     timeslot_from: '1656977400',
     timeslot_to: '1656978300',
     requester_id: 1,
@@ -259,6 +266,20 @@ const bookingsToInsert = [
     timeslot_from: '1658421000',
     timeslot_to: '1658424600',
     requester_id: 3
+  },
+  {
+    room_id: 1,
+    status: 'APPROVED',
+    timeslot_from: '1657954800',
+    timeslot_to: '1658214000',
+    requester_id: 4
+  },
+  {
+    room_id: 1,
+    status: 'APPROVED',
+    timeslot_from: '1658330100',
+    timeslot_to: '1658338200',
+    requester_id: 5
   }
 ]
 

@@ -1,18 +1,19 @@
-import { Button, Popover, DatePicker, Popconfirm, Alert } from 'antd'
-import moment from 'moment'
+import { Button, Popover, Popconfirm, Alert } from 'antd'
 import { useEffect, useState, useContext } from 'react'
 import { Link } from 'react-router-dom'
+import moment from 'moment'
 
 import styled from 'styled-components'
 import { isEmpty } from 'lodash'
 
 import { AppContext } from '../context'
 import { getRooms } from '../../util/room_api_util'
-import { saveBooking } from '../../util/booking_api_util'
+import {
+  saveBooking,
+  getApprovedBookingsByRoomId
+} from '../../util/booking_api_util'
 
-import { RoomIndexItem } from '../room_index_item/room_index_item'
-
-const { RangePicker } = DatePicker
+import { RangePickerWithTime } from '../RangerPickerWithTime'
 
 const BUTTON_BACKGROUND_COLOR = {
   small: 'green',
@@ -24,43 +25,6 @@ const StyledButton = styled(Button)`
   background-color: ${({ size }) => BUTTON_BACKGROUND_COLOR[size]};
   color: black;
 `
-
-const RangePickerWithTime = ({ setRangePicker }) => {
-  const onChange = (dates, dateStrings) => {
-    if (dates) {
-      //   console.log('From: ', dates[0], ', to: ', dates[1])
-      //   console.log('From: ', dateStrings[0], ', to: ', dateStrings[1])
-    } else {
-      //   console.log('Clear')
-    }
-  }
-
-  const disabledDate = (current) => {
-    // Can not select days before today and today
-    return current && current < moment().subtract(1, 'days').endOf('day')
-  }
-
-  const handleRangePickerOk = (range) => {
-    // console.log('handleRangePickerOk range: ', range)
-    // console.log('handleRangePickerOk from: ', from)
-    // console.log('handleRangePickerOk to : ', to)
-    setRangePicker(range)
-  }
-
-  return (
-    <RangePicker
-      disabledDate={disabledDate}
-      //   ranges={{
-      //     Today: [moment(), moment()]
-      //   }}
-      showTime
-      format="YYYY/MM/DD HH:mm"
-      onChange={onChange}
-      minuteStep={30}
-      onOk={handleRangePickerOk}
-    />
-  )
-}
 
 const transformPayload = (booking) => {
   return {
@@ -79,8 +43,11 @@ export const RoomIndex = () => {
 
   const [range, setRangePicker] = useState([])
 
+  const [unavailableRanges, setUnavailableRanges] = useState([])
+  console.log('unavailableRanges', unavailableRanges)
+  const [isSelectedRangeConflict, setIsSelectedRangeConflict] = useState(false)
+
   const [displaySuccessAlert, setDisplaySuccessAlert] = useState(false)
-  const [displayFailureAlert, setDisplayFailureAlert] = useState(false)
 
   useEffect(() => {
     setForm({ ...form, timeslotFrom: range[0], timeslotTo: range[1] })
@@ -99,6 +66,9 @@ export const RoomIndex = () => {
     })
   }, [])
 
+  const convertUnixStringToDateTimeFormat = (string) =>
+    moment.unix(string).format('MM/DD/YY HH:mm')
+
   const getRoomContent = (room) => {
     const isDateSelected = form.timeslotFrom && form.timeslotTo
 
@@ -107,17 +77,45 @@ export const RoomIndex = () => {
         <p>Location: {room.location}</p>
         <p>Size: {room.size}</p>
         <p>Select Booking Time</p>
-        <RangePickerWithTime setRangePicker={setRangePicker} />
+        <RangePickerWithTime
+          setRangePicker={setRangePicker}
+          unavailableRanges={unavailableRanges}
+          setIsSelectedRangeConflict={setIsSelectedRangeConflict}
+        />
         <br />
         <br />
         <Popconfirm
           title="Confirm Booking"
           onConfirm={handleClick}
           onVisibleChange={() => console.log('visible change')}
-          disabled={!isDateSelected}
+          disabled={!isDateSelected || isSelectedRangeConflict}
         >
-          <Button disabled={!isDateSelected}>BOOK</Button>
+          {isSelectedRangeConflict && (
+            <Alert
+              message="Selected Range is already booked."
+              type="error"
+              closable
+            />
+          )}
+          <Button disabled={!isDateSelected || isSelectedRangeConflict}>
+            BOOK
+          </Button>
         </Popconfirm>
+        <br />
+        <br />
+        {unavailableRanges.length > 0 && (
+          <div>
+            Booked times:
+            <div>
+              {unavailableRanges.map((range) => (
+                <li>
+                  From: {convertUnixStringToDateTimeFormat(range[0])}, To:
+                  {convertUnixStringToDateTimeFormat(range[1])}
+                </li>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -137,6 +135,11 @@ export const RoomIndex = () => {
               trigger="click"
               onVisibleChange={(isVisible) => {
                 if (isVisible) setForm(room)
+              }}
+              onClick={async () => {
+                const bookedRanges = await getApprovedBookingsByRoomId(room.id)
+
+                setUnavailableRanges(bookedRanges)
               }}
             >
               <StyledButton type="primary" size={room.size}>

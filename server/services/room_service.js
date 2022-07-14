@@ -8,7 +8,6 @@ const getAll = async () => {
 
 const getOne = async (id) => {
   const data = await db.query(`SELECT * FROM rooms WHERE id=${id}`)
-
   return data ? data[0] : []
 }
 

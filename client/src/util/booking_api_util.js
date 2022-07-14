@@ -25,6 +25,20 @@ export const getBookings = async () => {
   }
 }
 
+export const getApprovedBookingsByRoomId = async (roomId) => {
+  try {
+    const { data } = await axios.get(`/api/bookings/room-id/${roomId}`)
+
+    const approvedBookingTimings = data.map(
+      ({ timeslot_from, timeslot_to }) => [timeslot_from, timeslot_to]
+    )
+
+    return approvedBookingTimings
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 export const saveBooking = async (payload) => {
   try {
     const { data } = await axios.post('/api/bookings', payload)

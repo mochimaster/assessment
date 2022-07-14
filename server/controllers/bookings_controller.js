@@ -14,10 +14,10 @@ const post = async (req, res) => {
   const result = await bookingService.saveOne({
     ...body,
     requester_id: 1,
-    status: body.size === 'small' ? 'AUTO-APPROVED' : 'PENDING'
+    status: body.size === 'small' ? 'AUTO APPROVED' : 'PENDING'
   })
 
-  res.send({ result })
+  res.json(result)
 }
 
 const update = async (req, res, next) => {
@@ -76,8 +76,14 @@ const update = async (req, res, next) => {
   res.send('BOOKINGS APPROVED')
 }
 
+getApprovedBookingsByRoomId = async ({ params: { id } }, res) => {
+  const bookings = await bookingService.getApprovedBookingsByRoomId(id)
+  res.json(bookings)
+}
+
 module.exports = {
   index,
   post,
-  update
+  update,
+  getApprovedBookingsByRoomId
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Route, Switch, Link, Redirect } from 'react-router-dom'
+import { Route, Switch } from 'react-router-dom'
 
 import { AppContext } from './context'
 
@@ -16,9 +16,6 @@ const App = () => {
   const [user, setUser] = useState({})
 
   const dispatchUserEvent = (actionType, payload) => {
-    console.log('dispatchUserEvent actionType: ', actionType)
-    console.log('dispatchUserEvent payload: ', payload)
-
     switch (actionType) {
       case USER_ACTION.ADD_USER:
         setUser(payload)
@@ -35,8 +32,7 @@ const App = () => {
     <div>
       <AppContext.Provider value={{ user, dispatchUserEvent }}>
         <Route path="/" component={UserShow} />
-        <Route exact path="/booking">
-        </Route>
+        <Route exact path="/booking"></Route>
         <Switch>
           <Route path="/booking" component={BookingIndex} />
           <Route path="/" component={RoomIndex} />

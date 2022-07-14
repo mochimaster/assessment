@@ -42,9 +42,15 @@ const updateOne = (body) =>
         `UPDATE bookings SET status='${body.status}', manager_approver_id=(${body.manager_approver_id}) WHERE id=(${body.id})`
       )
 
+const getApprovedBookingsByRoomId = (roomId) =>
+  db.query(
+    `SELECT * FROM bookings WHERE room_id=${roomId} AND status = 'APPROVED' ORDER BY 1 DESC`
+  )
+
 module.exports = {
   getAll,
   getOne,
   saveOne,
-  updateOne
+  updateOne,
+  getApprovedBookingsByRoomId
 }

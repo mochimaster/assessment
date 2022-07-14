@@ -18,19 +18,15 @@ const StyledLoginContainer = styled.div`
 
 export const UserShow = (props) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  console.log('UserShow isLoggedIn: ', isLoggedIn)
+
   const [displayIncorrectLoginAlert, setDisplayIncorrectLoginAert] =
     useState(false)
 
-  console.log('UserShow props: ', props)
   const { user, dispatchUserEvent } = useContext(AppContext)
 
   useEffect(() => {
-    console.log('Use Effect user: ', user)
     if (isEmpty(user) && isLoggedIn) setIsLoggedIn(false)
   }, [user])
-  console.log('useContext user: ', user)
-  console.log('useContext dispatchUserEvent: ', dispatchUserEvent)
 
   const onFinish = async (values) => {
     const userResponse = await createSession(values)
@@ -44,15 +40,10 @@ export const UserShow = (props) => {
     }
   }
 
-  //   const onFinishFailed = (errorInfo) => {
-  //     console.log('Failed:', errorInfo)
-  //   }
-
   const onCloseAlert = () => setDisplayIncorrectLoginAert(false)
 
   return (
     <StyledLoginContainer>
-      {/* User show page */}
       {isLoggedIn && user && (
         <div>
           <div>Logged in as {user.name}</div>
@@ -66,14 +57,7 @@ export const UserShow = (props) => {
         <>
           <Form
             name="basic"
-            // labelCol={{
-            //   span: 8
-            // }}
-            // wrapperCol={{
-            //   span: 16
-            // }}
             onFinish={onFinish}
-            // onFinishFailed={onFinishFailed}
             autoComplete="off"
             style={{ width: 500 }}
           >
