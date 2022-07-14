@@ -9,6 +9,7 @@ const all = require('./routes/api/all')
 
 const roomsRouter = require('./routes/roomsRouter')
 const bookingsRouter = require('./routes/bookingsRouter')
+const usersRouter = require('./routes/usersRouter')
 
 const PORT = process.env.PORT || 3001
 
@@ -21,66 +22,18 @@ app.use(bodyParser.json())
 app.use('/api', all)
 app.use('/api/rooms', roomsRouter)
 app.use('/api/bookings', bookingsRouter)
+app.use('/api/users', usersRouter)
 
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`)
 })
 
-// const client = new Client()
-// client.connect()
-// client.query('SELECT $1::text as message', ['Hello world!'], (err, res) => {
-//   console.log(err ? err.stack : res.rows[0].message) // Hello World!
-//   client.end()
-// })
-
-// const pool = new Pool({
-//   user: 'dbuser',
-//   host: 'database.server.com',
-//   database: 'mydb',
-//   password: 'secretpassword',
-//   port: 3211
-// })
-// pool.query('SELECT NOW()', (err, res) => {
-//   console.log(err, res)
-//   pool.end()
-// })
-// const client = new Client({
-//   user: 'dbuser',
-//   host: 'database.server.com',
-//   database: 'mydb',
-//   password: 'secretpassword',
-//   port: 3211
-// })
 const client = new Client({
   user: 'postgres',
   host: 'localhost',
-  //   password: 'postgres',
   port: 5432
 })
 client.connect()
-// client.query('SELECT NOW()', (err, res) => {
-//   console.log(err, res)
-//   client.end()
-// })
-
-// const dbname = 'ASSIGNMENT'
-
-// const initializeDB = async () => {
-//   const db = new Pool({
-//     // host: 'SERVER_IP',
-//     database: 'assignment',
-//     // user: 'USER',
-//     // password: 'DB_PASS',
-//     // port: '5432'
-//   })
-//   db.query(
-//     'CREATE TABLE TABLE_NAME(id SERIAL PRIMARY KEY, xzy VARCHAR(40) NOT NULL, abc VARCHAR(40) NOT NULL)',
-//     (err, res) => {
-//       console.log(err, res)
-//       db.end()
-//     }
-//   )
-// }
 
 // initializeDB()
 
@@ -110,7 +63,7 @@ pool.connect(async (err, client, release) => {
 /**
  * Create Tables
  */
-const tables = ['rooms', 'bookings']
+const tables = ['rooms', 'bookings', 'users']
 
 const createTables = async (client) => {
   const queriesText = [
@@ -132,24 +85,26 @@ const createTables = async (client) => {
         timeslot_to VARCHAR(128) NOT NULL,
         requester_id INTEGER NOT NULL,
         approver_id INTEGER,
+        manager_approver_id INTEGER,
+        created_date TIMESTAMP default current_timestamp,
+        modified_date TIMESTAMP default current_timestamp
+      )`,
+    `CREATE TABLE IF NOT EXISTS
+      users(
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(128),
+        username VARCHAR(128),
+        password VARCHAR(128),
+        role VARCHAR(128),
         created_date TIMESTAMP default current_timestamp,
         modified_date TIMESTAMP default current_timestamp
       )`
   ]
-  //   const queryText = `CREATE TABLE IF NOT EXISTS
-  //       rooms(
-  //         id SERIAL PRIMARY KEY,
-  //         name VARCHAR(128) NOT NULL,
-  //         size VARCHAR(128) NOT NULL,
-  //         location VARCHAR(128) NOT NULL,
-  //         created_date TIMESTAMP default current_timestamp,
-  //         modified_date TIMESTAMP default current_timestamp
-  //       )`
 
   for (const queryText of queriesText) {
     await client
       .query(queryText)
-      .then((res) => {
+      .then(() => {
         console.log('CREATE TABLE SUCCESS')
         //   client.end()
       })
@@ -167,8 +122,8 @@ const dropTables = async (client) => {
   for (const table of tables) {
     await client
       .query(`DROP TABLE IF EXISTS ${table}`)
-      .then((res) => {
-        console.log('DROP TABLE SUCCESSL: ')
+      .then(() => {
+        console.log('DROP TABLE SUCCESS')
         //   client.end()
       })
       .catch((err) => {
@@ -229,41 +184,81 @@ const Room = sql.define({
 const bookingsToInsert = [
   {
     room_id: 5,
-    status: 'approved',
-    timeslot_from: new Date().setDate(new Date().getDate() - 7),
-    timeslot_to: new Date().setDate(new Date().getDate() - 6),
+    status: 'AUTO APPROVED',
+    timeslot_from: '1657143000',
+    timeslot_to: '1657146600',
     requester_id: 1,
     approver_id: 3
   },
   {
     room_id: 6,
-    status: 'approved',
-    timeslot_from: new Date().setDate(new Date().getDate() - 4),
-    timeslot_to: new Date().setDate(new Date().getDate() - 3),
+    status: 'AUTO APPROVED',
+    timeslot_from: '1656977400',
+    timeslot_to: '1656978300',
     requester_id: 1,
     approver_id: 3
   },
   {
     room_id: 7,
-    status: 'denied',
-    timeslot_from: new Date().setDate(new Date().getDate() - 2),
-    timeslot_to: new Date().setDate(new Date().getDate() - 1),
+    status: 'DENIED',
+    timeslot_from: '1656864000',
+    timeslot_to: '1656864900',
     requester_id: 1,
-    approver_id: 3
+    approver_id: 5
   },
   {
     room_id: 5,
-    status: 'pending',
-    timeslot_from: new Date().setDate(new Date().getDate() + 1),
-    timeslot_to: new Date().setDate(new Date().getDate() + 1),
-    requester_id: 1,
+    status: 'PENDING',
+    timeslot_from: '1658333700',
+    timeslot_to: '1658334600',
+    requester_id: 1
   },
   {
     room_id: 6,
-    status: 'pending',
-    timeslot_from: new Date().setDate(new Date().getDate() + 2),
-    timeslot_to: new Date().setDate(new Date().getDate() + 2),
+    status: 'PENDING',
+    timeslot_from: '1658421000',
+    timeslot_to: '1658424600',
+    requester_id: 1
+  },
+  {
+    room_id: 7,
+    status: 'SEMI APPROVED',
+    timeslot_from: '1658421000',
+    timeslot_to: '1658424600',
     requester_id: 1,
+    approver_id: 5
+  },
+  {
+    room_id: 7,
+    status: 'APPROVED',
+    timeslot_from: '1658421000',
+    timeslot_to: '1658424600',
+    requester_id: 1,
+    approver_id: 5,
+    manager_approver_id: 6
+  },
+  {
+    room_id: 8,
+    status: 'SEMI APPROVED',
+    timeslot_from: '1658421000',
+    timeslot_to: '1658424600',
+    requester_id: 1,
+    manager_approver_id: 6
+  },
+  {
+    room_id: 8,
+    status: 'SEMI APPROVED',
+    timeslot_from: '1658421000',
+    timeslot_to: '1658424600',
+    requester_id: 1,
+    manager_approver_id: 6
+  },
+  {
+    room_id: 8,
+    status: 'PENDING',
+    timeslot_from: '1658421000',
+    timeslot_to: '1658424600',
+    requester_id: 3
   }
 ]
 
@@ -276,8 +271,59 @@ const Booking = sql.define({
     'timeslot_from',
     'timeslot_to',
     'requester_id',
-    'approver_id'
+    'approver_id',
+    'manager_approver_id'
   ]
+})
+
+const usersToInsert = [
+  {
+    name: 'user1',
+    username: 'user1',
+    password: 'user1',
+    role: 'MEMBER'
+  },
+  {
+    name: 'user2',
+    username: 'user2',
+    password: 'user2',
+    role: 'MEMBER'
+  },
+  {
+    name: 'user3',
+    username: 'user3',
+    password: 'user3',
+    role: 'MEMBER'
+  },
+  {
+    name: 'user4',
+    username: 'user4',
+    password: 'user4',
+    role: 'ADMIN'
+  },
+  {
+    name: 'user5',
+    username: 'user5',
+    password: 'user5',
+    role: 'ADMIN'
+  },
+  {
+    name: 'user6',
+    username: 'user6',
+    password: 'user6',
+    role: 'FACILITY MANAGER'
+  },
+  {
+    name: 'user7',
+    username: 'user7',
+    password: 'user7',
+    role: 'FACILITY MANAGER'
+  }
+]
+
+const User = sql.define({
+  name: 'users',
+  columns: ['id', 'name', 'username', 'password', 'role']
 })
 
 const populateTables = async (client) => {
@@ -297,14 +343,16 @@ const populateTables = async (client) => {
   //     })
 
   let query = Room.insert(roomsToInsert).returning(Room.id).toQuery()
-  console.log('QUERY: ', query)
-  let { rows } = await client.query(query)
-  console.log('rows: ', rows)
+  const insertedRooms = await client.query(query)
+  console.log('INSERTED ROOMS: ', insertedRooms.rows)
 
   query = Booking.insert(bookingsToInsert).returning(Booking.id).toQuery()
-  console.log('QUERY: ', query)
-  insertedBookings = await client.query(query)
-  console.log('booking rows: ', insertedBookings.rows)
+  const insertedBookings = await client.query(query)
+  console.log('INSERTED BOOKINGS: ', insertedBookings.rows)
+
+  query = User.insert(usersToInsert).returning(User.id).toQuery()
+  const insertedUsers = await client.query(query)
+  console.log('INSERTED USERS: ', insertedUsers.rows)
 }
 
 // pool.on('remove', () => {

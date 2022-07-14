@@ -1,7 +1,12 @@
-import { Button, Popover, DatePicker, Popconfirm } from 'antd'
+import { Button, Popover, DatePicker, Popconfirm, Alert } from 'antd'
 import moment from 'moment'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
+import { Link } from 'react-router-dom'
 
+import styled from 'styled-components'
+import { isEmpty } from 'lodash'
+
+import { AppContext } from '../context'
 import { getRooms } from '../../util/room_api_util'
 import { saveBooking } from '../../util/booking_api_util'
 
@@ -9,8 +14,18 @@ import { RoomIndexItem } from '../room_index_item/room_index_item'
 
 const { RangePicker } = DatePicker
 
+const BUTTON_BACKGROUND_COLOR = {
+  small: 'green',
+  medium: 'yellow',
+  large: 'red'
+}
+
+const StyledButton = styled(Button)`
+  background-color: ${({ size }) => BUTTON_BACKGROUND_COLOR[size]};
+  color: black;
+`
+
 const RangePickerWithTime = ({ setRangePicker }) => {
-  console.log('RangePickerWithTime: ', setRangePicker)
   const onChange = (dates, dateStrings) => {
     if (dates) {
       //   console.log('From: ', dates[0], ', to: ', dates[1])
@@ -56,11 +71,16 @@ const transformPayload = (booking) => {
 }
 
 export const RoomIndex = () => {
+  const { user } = useContext(AppContext)
+
   const [rooms, setRooms] = useState([])
 
   const [form, setForm] = useState({})
 
   const [range, setRangePicker] = useState([])
+
+  const [displaySuccessAlert, setDisplaySuccessAlert] = useState(false)
+  const [displayFailureAlert, setDisplayFailureAlert] = useState(false)
 
   useEffect(() => {
     setForm({ ...form, timeslotFrom: range[0], timeslotTo: range[1] })
@@ -69,6 +89,7 @@ export const RoomIndex = () => {
   const handleClick = async () => {
     console.log('CLICKED BOOK, ', form)
     await saveBooking(transformPayload(form))
+    setDisplaySuccessAlert(true)
   }
 
   useEffect(() => {
@@ -100,21 +121,31 @@ export const RoomIndex = () => {
       </div>
     )
   }
-
+  if (isEmpty(user)) return <></>
   return (
-    <ul>
-      {rooms.map((room) => (
-        <Popover
-          content={getRoomContent(room)}
-          title={room.name}
-          trigger="click"
-          onVisibleChange={(isVisible) => {
-            if (isVisible) setForm(room)
-          }}
-        >
-          <Button type="primary">{room.name}</Button>
-        </Popover>
-      ))}
-    </ul>
+    <>
+      <Link to={'/booking'}>View Room Bookings</Link>
+      {displaySuccessAlert && (
+        <Alert message="Room booked successfully" type="success" closable />
+      )}
+      <ul>
+        {rooms.map((room) => (
+          <div key={room.id}>
+            <Popover
+              content={getRoomContent(room)}
+              title={room.name}
+              trigger="click"
+              onVisibleChange={(isVisible) => {
+                if (isVisible) setForm(room)
+              }}
+            >
+              <StyledButton type="primary" size={room.size}>
+                {room.name}
+              </StyledButton>
+            </Popover>
+          </div>
+        ))}
+      </ul>
+    </>
   )
 }

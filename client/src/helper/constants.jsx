@@ -1,0 +1,19 @@
+export const BOOKING_STATUS = {
+  APPROVED: 'APPROVED',
+  PENDING: 'PENDING',
+  DENIED: 'DENIED',
+  'AUTO APPROVED': 'AUTO APPROVED',
+  'SEMI APPROVED': 'SEMI APPROVED'
+}
+
+export const ROLES = {
+  MEMBER: 'MEMBER',
+  ADMIN: 'ADMIN',
+  'FACILITY MANAGER': 'FACILITY MANAGER'
+}
+
+export const ROOM_SIZES = {
+  SMALL: 'small',
+  MEDIUML: 'medium',
+  LARGE: 'large'
+}
